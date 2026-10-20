@@ -4,36 +4,17 @@
   const lerp = (a, b, t) => a + (b - a) * t;
   const clamp = (v, a = 0, b = 1) => Math.min(b, Math.max(a, v));
 
-  /* ---------- procedural "photos" (SVG data URIs) ---------- */
+  /* ---------- illustrations (img/*.svg) ---------- */
   const rnd = (seed) => () => (seed = (seed * 16807) % 2147483647) / 2147483647;
-  function house(seed) {
-    const r = rnd(seed * 97 + 13);
-    const skies = [['#e9a77c', '#4b3b52'], ['#cfe0ee', '#f1e6d6'], ['#f0c27b', '#2b2f45'], ['#b9d2e8', '#e8dccb']];
-    const [s1, s2] = skies[seed % skies.length];
-    let wins = '';
-    for (let i = 0; i < 5; i++)
-      wins += `<rect x="${70 + (i % 3) * 70}" y="${250 + Math.floor(i / 3) * 70}" width="48" height="52" fill="#ffcf7a" opacity="${.55 + r() * .45}"/>`;
-    return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 500"><defs><linearGradient id="g" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${s1}"/><stop offset="1" stop-color="${s2}"/></linearGradient></defs><rect width="400" height="500" fill="url(#g)"/><g fill="#1c3a22" opacity=".85"><circle cx="40" cy="330" r="60"/><circle cx="370" cy="320" r="70"/></g><rect x="50" y="170" width="300" height="270" fill="#23211f"/><rect x="40" y="150" width="320" height="34" fill="#6b4a32"/><rect x="60" y="200" width="150" height="150" fill="#3a3430"/>${wins}<rect x="250" y="290" width="70" height="150" fill="#7a4a2a"/><rect x="30" y="440" width="340" height="60" fill="#2d2a26"/></svg>`;
-  }
-  function crowd(seed) {
-    const r = rnd(seed * 31 + 5);
-    let p = '';
-    for (let i = 0; i < 9; i++) {
-      const x = 20 + r() * 360, y = 140 + r() * 180, c = ['#c98f6b', '#8a5a44', '#e0b08a', '#f0cfae'][Math.floor(r() * 4)];
-      const sh = ['#2b4c7e', '#a23b3b', '#e9e2d3', '#31312f', '#c2a14d'][Math.floor(r() * 5)];
-      p += `<circle cx="${x}" cy="${y}" r="20" fill="${c}"/><rect x="${x - 28}" y="${y + 22}" width="56" height="${70 + r() * 30}" rx="18" fill="${sh}"/>`;
-    }
-    return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 420"><rect width="400" height="420" fill="#a98963"/><rect y="290" width="400" height="130" fill="#3d6fa8"/><rect x="0" y="285" width="400" height="8" fill="#e9e2d3"/>${p}<rect x="40" y="60" width="130" height="70" fill="#e9d36a" opacity=".85"/><rect x="220" y="50" width="120" height="80" fill="#f3f0e8" opacity=".9"/></svg>`;
-  }
-  const uri = (svg) => `url('data:image/svg+xml;utf8,${encodeURIComponent(svg).replace(/'/g, '%27')}')`;
+  const img = (name) => `url('img/${name}.svg')`;
 
-  $$('[data-art]').forEach((el) => (el.style.backgroundImage = uri(house(+el.dataset.art))));
+  $$('[data-art]').forEach((el) => (el.style.backgroundImage = img('house' + el.dataset.art)));
 
   /* ---------- culture rows ---------- */
   $$('.row').forEach((row, ri) => {
     let html = '';
     for (let i = 0; i < 18; i++)
-      html += `<div class="polaroid" style="transform:rotate(${((i * 7 + ri * 3) % 7 - 3) * .8}deg)"><div style="background-image:${uri(crowd(i + ri * 5 + 1))}"></div></div>`;
+      html += `<div class="polaroid" style="transform:rotate(${((i * 7 + ri * 3) % 7 - 3) * .8}deg)"><div style="background-image:${img(i % 3 === 2 ? 'toast' : 'team')};background-size:${150 + (i * 37) % 60}%;background-position:${(i * 29 + ri * 41) % 100}% ${(i * 53 + ri * 17) % 100}%"></div></div>`;
     row.innerHTML = html;
   });
 
@@ -50,8 +31,8 @@
 
   /* ---------- testimonials ---------- */
   const T = [
-    ['Lorem Ipsum Dolor Sit Amet, Consectetur Adipiscing Elit. In Elementum, Sapien Vel Faucibus Sollicitudin, Arcu Risus Pharetra Mauris, Ornare Feugiat Eros Diam Non Risus. Quisque Fermentum Dolor Sapien, Sed Lacinia Arcu Gravida Sit Amet.', 'Grace Hopper, CTO', 3],
-    ['In Elementum, Sapien Vel Faucibus Sollicitudin, Arcu Risus Pharetra Mauris, Ornare Feugiat Eros Diam Non Risus. Lorem Ipsum Dolor Sit Amet, Consectetur Adipiscing Elit.', 'Grace Hopper, CTO', 7],
+    ['Lorem Ipsum Dolor Sit Amet, Consectetur Adipiscing Elit. In Elementum, Sapien Vel Faucibus Sollicitudin, Arcu Risus Pharetra Mauris, Ornare Feugiat Eros Diam Non Risus. Quisque Fermentum Dolor Sapien, Sed Lacinia Arcu Gravida Sit Amet.', 'Grace Hopper, CTO', 'toast'],
+    ['In Elementum, Sapien Vel Faucibus Sollicitudin, Arcu Risus Pharetra Mauris, Ornare Feugiat Eros Diam Non Risus. Lorem Ipsum Dolor Sit Amet, Consectetur Adipiscing Elit.', 'Grace Hopper, CTO', 'team'],
   ];
   let ti = 0, tStart = performance.now();
   const showT = (i) => {
@@ -59,7 +40,7 @@
     $('#tText').style.opacity = 0;
     setTimeout(() => {
       $('#tText').textContent = T[ti][0]; $('#tWho').textContent = '— ' + T[ti][1];
-      $('#tImg').style.backgroundImage = uri(crowd(T[ti][2])); $('#tText').style.opacity = 1;
+      $('#tImg').style.backgroundImage = img(T[ti][2]); $('#tText').style.opacity = 1;
     }, 250);
   };
   showT(0);
