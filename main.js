@@ -6,6 +6,8 @@
 
   /* ---------- illustrations (img/*.svg) ---------- */
   const rnd = (seed) => () => (seed = (seed * 16807) % 2147483647) / 2147483647;
+  const photo = (name) => `url('img/${name}.jpg')`;
+  const PHOTOS = ['office', 'friends', 'woman', 'man'];
   const img = (name) => `url('img/${name}.svg')`;
 
   $$('[data-art]').forEach((el) => (el.style.backgroundImage = img('house' + el.dataset.art)));
@@ -14,7 +16,7 @@
   $$('.row').forEach((row, ri) => {
     let html = '';
     for (let i = 0; i < 18; i++)
-      html += `<div class="polaroid" style="transform:rotate(${((i * 7 + ri * 3) % 7 - 3) * .8}deg)"><div style="background-image:${img(i % 3 === 2 ? 'toast' : 'team')};background-size:${150 + (i * 37) % 60}%;background-position:${(i * 29 + ri * 41) % 100}% ${(i * 53 + ri * 17) % 100}%"></div></div>`;
+      html += `<div class="polaroid" style="transform:rotate(${((i * 7 + ri * 3) % 7 - 3) * .8}deg)"><div style="background-image:${photo(PHOTOS[(i + ri * 2) % PHOTOS.length])};background-size:cover;background-repeat:no-repeat;background-position:${(i * 29 + ri * 41) % 100}% ${(i * 53 + ri * 17) % 100}%"></div></div>`;
     row.innerHTML = html;
   });
 
@@ -31,8 +33,8 @@
 
   /* ---------- testimonials ---------- */
   const T = [
-    ['Lorem Ipsum Dolor Sit Amet, Consectetur Adipiscing Elit. In Elementum, Sapien Vel Faucibus Sollicitudin, Arcu Risus Pharetra Mauris, Ornare Feugiat Eros Diam Non Risus. Quisque Fermentum Dolor Sapien, Sed Lacinia Arcu Gravida Sit Amet.', 'Grace Hopper, CTO', 'toast'],
-    ['In Elementum, Sapien Vel Faucibus Sollicitudin, Arcu Risus Pharetra Mauris, Ornare Feugiat Eros Diam Non Risus. Lorem Ipsum Dolor Sit Amet, Consectetur Adipiscing Elit.', 'Grace Hopper, CTO', 'team'],
+    ['Lorem Ipsum Dolor Sit Amet, Consectetur Adipiscing Elit. In Elementum, Sapien Vel Faucibus Sollicitudin, Arcu Risus Pharetra Mauris, Ornare Feugiat Eros Diam Non Risus. Quisque Fermentum Dolor Sapien, Sed Lacinia Arcu Gravida Sit Amet.', 'Grace Hopper, CTO', 'jpg:man'],
+    ['In Elementum, Sapien Vel Faucibus Sollicitudin, Arcu Risus Pharetra Mauris, Ornare Feugiat Eros Diam Non Risus. Lorem Ipsum Dolor Sit Amet, Consectetur Adipiscing Elit.', 'Grace Hopper, CTO', 'jpg:woman'],
   ];
   let ti = 0, tStart = performance.now();
   const showT = (i) => {
@@ -40,7 +42,7 @@
     $('#tText').style.opacity = 0;
     setTimeout(() => {
       $('#tText').textContent = T[ti][0]; $('#tWho').textContent = '— ' + T[ti][1];
-      $('#tImg').style.backgroundImage = img(T[ti][2]); $('#tText').style.opacity = 1;
+      $('#tImg').style.backgroundImage = (T[ti][2].startsWith('jpg:') ? photo(T[ti][2].slice(4)) : img(T[ti][2])); $('#tText').style.opacity = 1;
     }, 250);
   };
   showT(0);
