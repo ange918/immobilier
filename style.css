@@ -150,22 +150,48 @@ img{display:block}
 
 
 
-/* entrance animations (added on top of the static layout; JS adds .js, .rv and .in) */
-.js .rv{opacity:0;translate:0 2rem;transition:opacity 1s cubic-bezier(.2,.7,.2,1) var(--d,0s),translate 1s cubic-bezier(.2,.7,.2,1) var(--d,0s),scale 1s cubic-bezier(.2,.7,.2,1) var(--d,0s)}
-.js .rv.in{opacity:1;translate:0 0;scale:1}
+/* animations ported from the cap repo: rise, step edge, progress bar, parallax frames, press, drift, menu */
+#progress{position:fixed;inset:0 0 auto 0;height:2px;z-index:200;background:var(--orange);transform-origin:left;transform:scaleX(0);will-change:transform}
+html.lenis,html.lenis body{height:auto}
+.lenis.lenis-smooth{scroll-behavior:auto!important}
+.lenis:not(.lenis-autoToggle).lenis-stopped{overflow:clip}
+.hero-media{background:none}
+.hero-bg{position:absolute;inset:0;background:url(img/hero.jpg) center/cover;animation:drift 9s ease-in-out infinite alternate;will-change:transform}
+@keyframes drift{from{transform:scale(1.02) translate3d(0,0,0)}to{transform:scale(1.08) translate3d(-1.5%,-1%,0)}}
+.ph-bg{position:absolute;inset:0;background-size:cover;background-position:center;will-change:transform;transition:scale .8s cubic-bezier(.2,.7,.2,1)}
+.s:hover .ph-bg,.posts article:hover .ph-bg{scale:1.06}
+.step-edge{position:absolute;left:0;right:0;bottom:0;height:5rem;display:flex;align-items:flex-end;overflow:hidden;pointer-events:none;z-index:3}
+.step-bar{flex:1 1 0;margin-right:-1px;height:100%;background:#fd610a;transform-origin:bottom;transform:scaleY(calc(var(--p,0) * var(--h)));backface-visibility:hidden;will-change:transform}
+.js .rv{opacity:0;translate:0 1.75rem;filter:blur(0.5rem);transition:opacity .9s cubic-bezier(.22,1,.36,1) var(--d,0s),translate .9s cubic-bezier(.22,1,.36,1) var(--d,0s),scale .9s cubic-bezier(.22,1,.36,1) var(--d,0s),filter .9s cubic-bezier(.22,1,.36,1) var(--d,0s)}
+.js .rv.in{opacity:1;translate:0 0;scale:1;filter:none}
 .js .rv.rv-big{translate:0 .3em}
 .js .rv.rv-scale{scale:.86;translate:0 1.5rem}
 .js .rv.rv-big.in,.js .rv.rv-scale.in{translate:0 0;scale:1}
+.js .h2.rv.in{filter:drop-shadow(0 0 1px rgba(255,255,255,.45))}
+.js #process .h2.rv.in{filter:none}
 .js .hero-media{scale:1.12;transition:scale 2.2s cubic-bezier(.2,.7,.2,1)}
 .js .hero-media.in{scale:1}
 .js .nav{opacity:0;transition:opacity 1s .3s}
 .js .nav.in{opacity:1}
-.js .btn,.js .pill,.js .burger{transition:transform .35s cubic-bezier(.2,.7,.2,1),background .3s,opacity .3s}
-.js .s .ph,.js .posts .ph{transition:scale .8s cubic-bezier(.2,.7,.2,1)}
-.js .s:hover .ph,.js .posts article:hover .ph{scale:1.03}
+.btn,.pill,.burger,.arrows button{transition:scale .15s ease-out,transform .35s cubic-bezier(.2,.7,.2,1),background .3s,opacity .3s}
+.btn:active,.pill:active,.burger:active,.arrows button:active{scale:.96}
+.menu-wrap{position:fixed;inset:3.75rem 0 0 0;z-index:90}
+.menu-scrim{position:absolute;inset:0;border:0;background:rgba(0,0,0,.35);cursor:default}
+.menu{position:absolute;top:0;right:6.6875rem;width:22.5rem;padding:1.125rem 1.375rem 1.25rem;border-radius:1.5rem;background:#f4f4f2;color:#111;box-shadow:0 1.875rem 5rem rgba(0,0,0,.55);transform-origin:top right;animation:menu-drop .26s cubic-bezier(.22,1,.36,1)}
+.menu ul{list-style:none}
+.menu li{border-bottom:1px solid #e1dfda;animation:menu-in .52s cubic-bezier(.2,.7,.2,1) both;animation-delay:calc(60ms + var(--i) * 45ms)}
+.menu li:last-child{border-bottom:0}
+.menu a{display:flex;align-items:baseline;gap:1rem;padding:0.875rem 0;font-family:var(--head);font-stretch:70%;font-weight:800;font-size:1.75rem;line-height:1;letter-spacing:-.02em;transition:translate .3s}
+.menu a:hover{translate:0.375rem 0}
+.menu a i{font:400 0.6875rem var(--body);font-style:normal;color:#777;letter-spacing:0}
+.menu p{margin-top:0.875rem;font-size:0.6875rem;color:#777}
+@keyframes menu-drop{from{opacity:0;transform:translateY(-0.625rem) scale(.98)}to{opacity:1;transform:none}}
+@keyframes menu-in{from{opacity:0;transform:translateY(1rem);filter:blur(0.375rem)}to{opacity:1;transform:none;filter:none}}
 @media (prefers-reduced-motion:reduce){
-  .js .rv,.js .rv.in{opacity:1;translate:none;scale:none;transition:none}
+  .js .rv,.js .rv.in{opacity:1;translate:none;scale:none;filter:none;transition:none}
   .js .hero-media,.js .nav{scale:none;opacity:1;transition:none}
+  .hero-bg,.menu,.menu li{animation:none}
+  .step-bar{transform:scaleY(var(--h))}
 }
 
 @media (max-width:51.25rem){
@@ -173,10 +199,11 @@ img{display:block}
   /* nav */
   .nav{padding:0 1.25rem;height:3.75rem}
   .links,.pill{display:none}
+  .menu{left:1.25rem;right:1.25rem;width:auto}
   .brand{font-size:1.1875rem}
   /* hero */
   #hero{height:100svh;min-height:37.5rem}
-  .hero-media{background-position:30% 50%}
+  .hero-bg{background-position:30% 50%}
   .hero-copy{left:1.25rem;right:1.25rem;top:auto;bottom:4rem;width:auto}
   .eyebrow-hero{font-size:0.8125rem;margin-bottom:1.125rem}
   #hero h1{font-size:10.2vw;line-height:.98}
@@ -210,10 +237,12 @@ img{display:block}
   .w .ph{height:auto;aspect-ratio:1.265}
   /* process */
   #process{height:auto;padding:4.375rem 1.25rem 5rem}
-  .circles{position:relative;left:auto;top:auto;width:auto;height:auto;margin-top:2.75rem}
-  .c,.c:nth-child(4){position:relative;left:auto;top:auto;width:60vw;height:60vw;margin-top:-6vw}
-  .c:nth-child(1){margin-top:0}
-  .c:nth-child(2){margin-left:12vw}.c:nth-child(3){margin-left:24vw}.c:nth-child(4){margin-left:30vw}
+  .circles{position:relative;left:auto;top:auto;width:auto;height:116vw;margin-top:2.5rem}
+  .c,.c:nth-child(4){position:absolute;width:46vw;height:46vw;margin:0;font-size:0.875rem}
+  .c:nth-child(1){left:0;top:0}
+  .c:nth-child(2){left:38vw;top:14vw}
+  .c:nth-child(3){left:0;top:56vw}
+  .c:nth-child(4){left:38vw;top:70vw}
   /* team */
   #team{height:auto;padding:3.5rem 1.25rem 3.125rem}
   .fan{position:relative;top:auto;height:56vw;margin-top:2rem}

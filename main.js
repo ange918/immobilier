@@ -45,9 +45,34 @@
   $('#tNext').onclick = () => go(1); $('#tPrev').onclick = () => go(-1);
 
 
-  /* ---------- entrance animations ---------- */
+  /* ---------- scroll bus: Lenis with the same settings as the cap repo ---------- */
   const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
   const mobile = innerWidth < 820;
+  const listeners = new Set();
+  const onScroll = (fn) => { listeners.add(fn); fn(); };
+  const emit = () => listeners.forEach((fn) => fn());
+  let lenis = null;
+  if (!reduce && window.Lenis) {
+    lenis = new Lenis({ lerp: 0.085, smoothWheel: true, anchors: true });
+    lenis.on('scroll', emit);
+    requestAnimationFrame(function loop(t) { lenis.raf(t); requestAnimationFrame(loop); });
+  } else {
+    let f = 0;
+    addEventListener('scroll', () => { cancelAnimationFrame(f); f = requestAnimationFrame(emit); }, { passive: true });
+    $$('a[href^="#"]').forEach((a) => a.addEventListener('click', (e) => {
+      const t = $(a.getAttribute('href')); if (!t) return; e.preventDefault(); t.scrollIntoView({ behavior: 'smooth' });
+    }));
+  }
+  addEventListener('resize', emit);
+
+  /* ---------- scroll progress bar ---------- */
+  const bar = $('#progress');
+  onScroll(() => {
+    const max = document.documentElement.scrollHeight - innerHeight;
+    bar.style.transform = `scaleX(${max > 0 ? scrollY / max : 0})`;
+  });
+
+  /* ---------- rise: fade, lift and un-blur when an element enters ---------- */
   const mark = (sel, { step = 0.1, base = 0, cls = '' } = {}) =>
     $$(sel).forEach((el, i) => { el.classList.add('rv'); if (cls) el.classList.add(cls); el.style.setProperty('--d', `${base + i * step}s`); });
   mark('#hero h1 .l1, #hero h1 .l2', { step: 0.14, base: 0.35, cls: 'rv-big' });
@@ -67,33 +92,62 @@
   mark('.giant', { base: 0.1 });
   const io = new IntersectionObserver((es) => es.forEach((e) => {
     if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); }
-  }), { threshold: 0.12, rootMargin: '0px 0px -6% 0px' });
+  }), { threshold: 0.16, rootMargin: '0px 0px -6% 0px' });
   $$('.rv').forEach((el) => io.observe(el));
   requestAnimationFrame(() => { $('#nav').classList.add('in'); $('#heroMedia').classList.add('in'); });
 
-  /* ---------- smooth wheel scrolling ---------- */
-  if (!reduce && matchMedia('(pointer: fine)').matches) {
-    let target = scrollY, current = scrollY, raf = 0;
-    const max = () => document.documentElement.scrollHeight - innerHeight;
-    const step = () => {
-      current += (target - current) * 0.09;
-      if (Math.abs(target - current) < 0.5) { current = target; raf = 0; } else raf = requestAnimationFrame(step);
-      scrollTo({ top: current, behavior: 'instant' });
-    };
-    const kick = () => { if (!raf) raf = requestAnimationFrame(step); };
-    addEventListener('wheel', (e) => {
-      if (e.ctrlKey || e.defaultPrevented) return;
-      e.preventDefault();
-      target = clamp(target + e.deltaY * (e.deltaMode === 1 ? 32 : 1), 0, max());
-      kick();
-    }, { passive: false });
-    addEventListener('scroll', () => { if (!raf) target = current = scrollY; }, { passive: true });
-    window.smoothTo = (y) => { target = clamp(y, 0, max()); kick(); };
-  }
+  /* ---------- image parallax: each picture drifts inside its frame ---------- */
+  const frames = $$('.ph').map((ph) => {
+    const bg = document.createElement('div');
+    bg.className = 'ph-bg';
+    bg.style.backgroundImage = ph.style.backgroundImage;
+    bg.style.backgroundPosition = ph.style.backgroundPosition;
+    bg.style.backgroundSize = ph.style.backgroundSize;
+    ph.style.backgroundImage = ''; ph.style.backgroundPosition = ''; ph.style.backgroundSize = '';
+    ph.appendChild(bg);
+    return { ph, bg };
+  });
+  if (!reduce) onScroll(() => {
+    const vh = innerHeight;
+    frames.forEach(({ ph, bg }) => {
+      const r = ph.getBoundingClientRect();
+      if (r.bottom < -vh * 0.2 || r.top > vh * 1.2) return;
+      const p = (vh - r.top) / (vh + r.height);
+      bg.style.transform = `translate3d(0, ${((p - 0.5) * 36).toFixed(2)}px, 0) scale(1.08)`;
+    });
+  });
 
-  $$('a[href^="#"]').forEach((a) => a.addEventListener('click', (e) => {
-    const t = $(a.getAttribute('href')); if (!t) return; e.preventDefault();
-    const y = t.getBoundingClientRect().top + scrollY;
-    window.smoothTo ? window.smoothTo(y) : scrollTo({ top: y, behavior: 'smooth' });
-  }));
+  /* ---------- step edge: bars rise at the bottom of Selected Works as Work Process arrives ---------- */
+  const edge = $('#stepEdge'), proc = $('#process');
+  onScroll(() => {
+    if (reduce) { edge.style.setProperty('--p', '1'); return; }
+    const p = clamp((innerHeight - proc.getBoundingClientRect().top) / (innerHeight * 0.72));
+    edge.style.setProperty('--p', p.toFixed(4));
+  });
+
+  /* ---------- count-up: the four figures count while they scroll in ---------- */
+  $$('#stats b').forEach((el) => {
+    const m = el.textContent.match(/^(\D*)(\d+(?:\.\d+)?)(.*)$/);
+    if (!m || reduce) return;
+    const [, pre, num, post] = m, to = parseFloat(num), dec = (num.split('.')[1] || '').length;
+    let shown = '';
+    onScroll(() => {
+      const r = el.getBoundingClientRect(), vh = innerHeight;
+      const p = clamp((vh * 1.02 - r.top) / (vh * 0.62));
+      const v = (to * (1 - (1 - p) ** 2)).toFixed(dec);
+      if (v === shown) return;
+      shown = v; el.textContent = pre + v + post;
+    });
+  });
+
+  /* ---------- menu ---------- */
+  const burger = $('.burger'), wrap = $('#menuWrap');
+  const setMenu = (open) => {
+    wrap.hidden = !open; burger.setAttribute('aria-expanded', String(open));
+    if (lenis) open ? lenis.stop() : lenis.start();
+  };
+  burger.addEventListener('click', () => setMenu(wrap.hidden));
+  $('.menu-scrim').addEventListener('click', () => setMenu(false));
+  $$('#menu a').forEach((a) => a.addEventListener('click', () => setMenu(false)));
+  addEventListener('keydown', (e) => { if (e.key === 'Escape' && !wrap.hidden) setMenu(false); });
 })();
