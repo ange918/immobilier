@@ -150,7 +150,73 @@ img{display:block}
 
 
 @media (max-width:51.25rem){
-  html{font-size:calc(100vw/50)}
+  html{font-size:100%}
+  /* nav */
+  .nav{padding:0 1.25rem;height:3.75rem}
+  .links,.pill{display:none}
+  .brand{font-size:1.1875rem}
+  /* hero */
+  #hero{height:100svh;min-height:37.5rem}
+  .hero-media{background-position:30% 50%}
+  .hero-copy{left:1.25rem;right:1.25rem;top:auto;bottom:4rem;width:auto}
+  .eyebrow-hero{font-size:0.8125rem;margin-bottom:1.125rem}
+  #hero h1{font-size:10.2vw;line-height:.98}
+  .hero-row{flex-direction:column;align-items:flex-start;gap:1.375rem;margin-top:1.625rem}
+  .hero-sub{width:auto;white-space:normal;font-size:0.8125rem;line-height:1.25rem}
+  .hero-btns{flex-wrap:wrap}
+  /* about */
+  #about{padding:5.25rem 1.25rem 5.625rem}
+  .statement{width:auto;white-space:normal;font-size:8.2vw;line-height:1.04}
+  .statement span{display:inline}.statement span::after{content:" "}
+  .about-foot{height:auto;margin-top:1.875rem;display:flex;flex-direction:column;gap:1.375rem;align-items:flex-start}
+  .about-foot .btn,.partners{position:static}
+  .partners{gap:0.75rem}
+  /* headings */
+  .h2{font-size:17vw;line-height:1}
+  #services .h2,#works .h2,#team .h2{transform:none;letter-spacing:-.03em}
+  #process .h2{letter-spacing:-.02em;font-size:15.5vw}
+  #blog .h2{letter-spacing:-.03em;font-size:14.5vw}
+  /* services */
+  #services{height:auto;padding:3.5rem 1.25rem 3.75rem}
+  #services .h2{margin-top:0.375rem}
+  #services .svc{grid-template-columns:1fr;gap:2.75rem;margin-top:1.75rem}
+  .s1,.s3,.s2{margin-top:0}
+  .s .ph{height:auto;aspect-ratio:.92}
+  .s p,.w p{width:auto;max-width:21.25rem}
+  /* works */
+  #works{padding:3rem 0 4rem}
+  #works .eyebrow,#works .h2{margin-left:1.25rem}
+  .car{margin-top:1.625rem}
+  .w{flex-basis:78vw}
+  .w .ph{height:auto;aspect-ratio:1.265}
+  /* process */
+  #process{height:auto;padding:4.375rem 1.25rem 5rem}
+  .circles{position:relative;left:auto;top:auto;width:auto;height:auto;margin-top:2.75rem}
+  .c,.c:nth-child(4){position:relative;left:auto;top:auto;width:60vw;height:60vw;margin-top:-6vw}
+  .c:nth-child(1){margin-top:0}
+  .c:nth-child(2){margin-left:12vw}.c:nth-child(3){margin-left:24vw}.c:nth-child(4){margin-left:30vw}
+  /* team */
+  #team{height:auto;padding:3.5rem 1.25rem 3.125rem}
+  .fan{position:relative;top:auto;height:56vw;margin-top:2rem}
+  .card{width:42vw;height:47vw}
+  .who{position:relative;top:auto;margin-top:2.25rem}
+  .arrows{position:relative;top:auto;margin-top:1.25rem}
+  /* stats */
+  #stats{display:grid;grid-template-columns:1fr 1fr;gap:1.875rem 1rem;height:auto;padding:2.5rem 1.25rem}
+  #stats div+div::before{display:none}
+  #stats b{font-size:2.125rem}
+  #stats span{font-size:0.8125rem}
+  /* blog */
+  #blog{padding:4.375rem 1.25rem 4.375rem}
+  .posts{grid-template-columns:1fr;width:auto;gap:2.375rem;margin-top:2.125rem}
+  .posts .ph{height:auto;aspect-ratio:1.52}
+  .posts h4{max-width:none}
+  /* footer */
+  #contact{padding:4.375rem 1.25rem 3.75rem}
+  .fgrid{grid-template-columns:1fr 1fr;gap:2.25rem 1rem}
+  .touch{grid-column:1/-1}
+  .touch form{width:100%;max-width:21.25rem}
+  .mail{font-size:1.125rem!important}
+  .giant{height:34vw;margin-top:2.75rem}
+  .giant span{font-size:16.4vw}
 }
-
-.statement .l1{color:#fafafa}.statement .l2{color:#eee}.statement .l3{color:#e2e2e2}.statement .l4{color:#c6c6c6}.statement .l5{color:#a8a8a8}

@@ -28,7 +28,7 @@
   const STEP = 30 * Math.PI / 180;
   let ti = 0;
   const layoutFan = () => {
-    const r = innerWidth * (742 / 1280);
+    const r = innerWidth * (742 / 1280) * (innerWidth < 820 ? 1.6 : 1);
     cards.forEach((c, i) => {
       let d = i - ti; const n = cards.length;
       if (d > n / 2) d -= n; if (d < -n / 2) d += n;
