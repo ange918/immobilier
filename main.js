@@ -3,6 +3,12 @@
   const $$ = (s, c = document) => [...c.querySelectorAll(s)];
   const clamp = (v, a = 0, b = 1) => Math.min(b, Math.max(a, v));
 
+  /* ---------- language (English source text, French dictionary in i18n.js) ---------- */
+  const FR = window.I18N_FR || {};
+  let lang = 'en';
+  const t = (s) => (lang === 'fr' && FR[s]) || s;
+  const EN_TITLE = document.title;
+
   /* ---------- selected works carousel ---------- */
   const track = $('#track'), items = $$('.w', track), car = $('#car');
   let wi = 1;
@@ -38,7 +44,7 @@
       c.style.zIndex = 10 - Math.abs(d);
       c.classList.toggle('dim', d !== 0);
     });
-    $('#tName').textContent = team[ti][0]; $('#tRole').textContent = team[ti][1];
+    $('#tName').textContent = team[ti][0]; $('#tRole').textContent = t(team[ti][1]);
   };
   layoutFan(); addEventListener('resize', layoutFan);
   const go = (d) => { ti = (ti + d + cards.length) % cards.length; layoutFan(); };
@@ -125,18 +131,22 @@
     edge.style.setProperty('--p', p.toFixed(4));
   });
 
-  /* ---------- count-up: the four figures count while they scroll in ---------- */
+  /* ---------- count-up: the four figures count while they scroll in (English and French forms) ---------- */
   $$('#stats b').forEach((el) => {
-    const m = el.textContent.match(/^(\D*)(\d+(?:\.\d+)?)(.*)$/);
-    if (!m || reduce) return;
-    const [, pre, num, post] = m, to = parseFloat(num), dec = (num.split('.')[1] || '').length;
-    let shown = '';
+    const parse = (s) => {
+      const m = s.match(/^(\D*)(\d+(?:[.,]\d+)?)(.*)$/);
+      return m && { pre: m[1], to: parseFloat(m[2].replace(',', '.')), dec: (m[2].split(/[.,]/)[1] || '').length, post: m[3] };
+    };
+    const forms = { en: parse(el.textContent), fr: parse(el.dataset.fr || el.textContent) };
     onScroll(() => {
+      const f = forms[lang] || forms.en;
+      if (!f) return;
       const r = el.getBoundingClientRect(), vh = innerHeight;
-      const p = clamp((vh * 1.02 - r.top) / (vh * 0.62));
-      const v = (to * (1 - (1 - p) ** 2)).toFixed(dec);
-      if (v === shown) return;
-      shown = v; el.textContent = pre + v + post;
+      const p = reduce ? 1 : clamp((vh * 1.02 - r.top) / (vh * 0.62));
+      let v = (f.to * (1 - (1 - p) ** 2)).toFixed(f.dec);
+      if (lang === 'fr') v = v.replace('.', ',');
+      const out = f.pre + v + f.post;
+      if (el.textContent !== out) el.textContent = out;
     });
   });
 
@@ -150,4 +160,27 @@
   $('.menu-scrim').addEventListener('click', () => setMenu(false));
   $$('#menu a').forEach((a) => a.addEventListener('click', () => setMenu(false)));
   addEventListener('keydown', (e) => { if (e.key === 'Escape' && !wrap.hidden) setMenu(false); });
+  /* ---------- language switch ---------- */
+  const applyLang = (l) => {
+    lang = l;
+    document.documentElement.lang = l;
+    const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT, {
+      acceptNode: (n) => (n.parentElement && n.nodeValue.trim() && !n.parentElement.closest('script, style, #stats b') ? NodeFilter.FILTER_ACCEPT : NodeFilter.FILTER_REJECT),
+    });
+    for (let n; (n = walker.nextNode());) {
+      if (n.__en === undefined) n.__en = n.nodeValue;
+      const k = n.__en.trim();
+      n.nodeValue = l === 'fr' && FR[k] ? n.__en.replace(k, FR[k]) : n.__en;
+    }
+    $$('input[placeholder]').forEach((i) => { i.dataset.en = i.dataset.en || i.placeholder; i.placeholder = t(i.dataset.en); });
+    $('#lang').textContent = l === 'fr' ? 'EN' : 'FR';
+    document.title = l === 'fr' ? 'StudioNorth — Nous les rendons prêts à convertir' : EN_TITLE;
+    try { localStorage.setItem('lang', l); } catch (e) {}
+    layoutFan();
+    emit();
+  };
+  $('#lang').addEventListener('click', () => applyLang(lang === 'fr' ? 'en' : 'fr'));
+  let start = 'en';
+  try { start = new URLSearchParams(location.search).get('lang') || localStorage.getItem('lang') || 'en'; } catch (e) {}
+  if (start === 'fr') applyLang('fr');
 })();
